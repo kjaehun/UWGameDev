@@ -6,12 +6,12 @@ public class GameAssets : MonoBehaviour
 {
 
     public GameObject cardPrefab;
+    public GameObject statusBarPrefab;
 
 
     public static GameAssets instance;
-
-    // Start is called before the first frame update
-    void Start()
+    
+    void Awake()
     {
         instance = this;
         

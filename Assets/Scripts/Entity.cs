@@ -15,6 +15,9 @@ public class Entity : MonoBehaviour
         healthBar = StatusBarController.GenerateBar(gameObject);
         health = maxHealth;
     }
+    protected void Setup() {
+        Start();
+    }
 
     // Update is called once per frame
     void Update()

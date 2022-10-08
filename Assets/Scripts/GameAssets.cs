@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class GameAssets : MonoBehaviour
 {
-
-    public GameObject cardPrefab;
     public GameObject statusBarPrefab;
 
 
@@ -14,9 +12,6 @@ public class GameAssets : MonoBehaviour
     void Awake()
     {
         instance = this;
-        
-
-
     }
 
     // Update is called once per frame

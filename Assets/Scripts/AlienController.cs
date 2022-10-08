@@ -2,14 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Monster : MonoBehaviour
+public class AlienController : Entity
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    void Start() {
+        base.Setup();
 
+    }
     // Update is called once per frame
     void Update()
     {

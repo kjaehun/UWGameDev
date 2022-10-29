@@ -7,7 +7,7 @@ public class MathA : MonoBehaviour
     private static List<InterpolationObject> interpolationList = new List<InterpolationObject>();
 
     // Only use this on things which do not have a Rigidbody2D component
-    public static void AddToInterpolate(GameObject thing, Vector2 goal, float time) {
+    public static void Interpolate(GameObject thing, Vector2 goal, float time) {
         InterpolationObject interp = new InterpolationObject(thing, goal, time);
         interpolationList.Add(interp);
     }

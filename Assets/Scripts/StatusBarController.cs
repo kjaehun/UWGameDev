@@ -37,7 +37,7 @@ public class StatusBarController : MonoBehaviour
     }
 
     public static StatusBarController GenerateBar(GameObject parent, Vector2 offset) {
-        GameObject physicalStatusBar = GameObject.Instantiate(GameAssets.instance.statusBarPrefab, Vector3.zero, Quaternion.identity);
+        GameObject physicalStatusBar = GameObject.Instantiate(GameAssets.inst.statusBarPrefab, Vector3.zero, Quaternion.identity);
         physicalStatusBar.GetComponent<Transform>().SetParent(parent.GetComponent<Transform>());
         physicalStatusBar.GetComponent<Transform>().localPosition = offset;
         return physicalStatusBar.GetComponent<StatusBarController>();

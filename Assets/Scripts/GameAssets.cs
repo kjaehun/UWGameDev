@@ -4,20 +4,23 @@ using UnityEngine;
 
 public class GameAssets : MonoBehaviour
 {
-    public GameObject statusBarPrefab;
+   public static GameAssets inst;
+   bool val = true;
 
+   public Color waterColor;
+   public Color smogColor;
+   public Color sludgeColor;
+   public Color radioactivityColor;
+   public Color oilColor;
 
-    public static GameAssets instance;
+   public GameObject statusBarPrefab;
+   public GameObject cardPrefab;
+
+   public GameObject[] cardPrefabs;
     
     void Awake()
     {
-        instance = this;
+        inst = this;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-    
 }

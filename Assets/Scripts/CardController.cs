@@ -11,17 +11,34 @@ public class CardController : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI descriptionHolder;
     [SerializeField]
-    private TextMeshProUGUI durationHolder;
+    private TextMeshProUGUI manaHolder;
     [SerializeField]
     private Sprite backgroundHolder;
 
 
     private CardData card;
 
-    // Start is called before the first frame update
-    void Start()
-    {
+
+    private bool followCursor;
+
+
+    void OnMouseOver() {
+        if (Input.GetMouseButton(0) && card.getOwner().Equals(GameLogic.instance.getCurrentController())) {
+            followCursor = true;
+            
+        }
         
+    }
+
+    void Update() {
+        if (followCursor) {
+            Vector2 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            gameObject.GetComponent<Transform>().position = pos;
+
+            GameLogic.instance.SetControlledCard(card);
+        }
+        if (Input.GetMouseButtonUp(0)) followCursor = false;
+
     }
 
     public void Setup(CardData card) {
@@ -32,6 +49,6 @@ public class CardController : MonoBehaviour
     public void UpdateVisuals() {
         nameHolder.text = card.getName();
         descriptionHolder.text = card.getDescription();
-        durationHolder.text = card.getDuration().ToString();
+        manaHolder.text = card.getManaCost().ToString();
     }
 }

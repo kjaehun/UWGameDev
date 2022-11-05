@@ -4,19 +4,17 @@ using UnityEngine;
 
 public class GameAssets : MonoBehaviour
 {
-   public static GameAssets inst;
-   bool val = true;
+    public static GameAssets inst;
 
-   public Color waterColor;
-   public Color smogColor;
-   public Color sludgeColor;
-   public Color radioactivityColor;
-   public Color oilColor;
+    public Color waterColor;
+    public Color smogColor;
+    public Color sludgeColor;
+    public Color radioactivityColor;
+    public Color oilColor;
 
-   public GameObject statusBarPrefab;
-   public GameObject cardPrefab;
-
-   public GameObject[] cardPrefabs;
+    public GameObject statusBarPrefab;
+    public GameObject cardPrefab;
+    public GameObject battleFieldPrefab;
     
     void Awake()
     {

@@ -2,11 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class InterpolationObject
 {
+    [SerializeField]
     private GameObject thing;
     private Vector2 goal;
     private Vector2 velocity;
+    [SerializeField]
     private float time;
 
     public InterpolationObject(GameObject thing, Vector2 goal, float time) {
@@ -20,10 +23,13 @@ public class InterpolationObject
         time -= dt;
         if (time <= 0) {
             thing.transform.position = goal;
-            MathA.RemoveFromInterpolate(this);
         } else {
             thing.transform.position += (Vector3)(velocity * dt);
         }
+    }
+
+    public bool isBeyondTime() {
+        return (time <= 0);
     }
 
 

@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static CardData.Element;
+using static CardData.Type;
 
 public class GameLogic : MonoBehaviour
 {
@@ -25,14 +27,25 @@ public class GameLogic : MonoBehaviour
         instance = this;
     }
 
+    // TODO
+    // create a lot of separate functions just for initializing specific cards?
+    // like public CardData smogDefense(arguments) {return smog defense card}
+
+    //CardData(string name, string description, Type type, Element element, int manaCost, int dmg, int def, int duration, int skill)
+
     public void StartGame() {
         PlayerData player1 = new PlayerData();
         PlayerData player2 = new PlayerData();
 
-        CardData card1 = new CardData("Basic Attack", "Deal 4 damage each turn for 2 turns.", 1, CardData.Tools.MakeAttack(4,2));
-        CardData card2 = new CardData("Slow Attack", "Deal 2 damage each turn for 5 turns.", 1, CardData.Tools.MakeAttack(2, 5));
-        CardData card3 = new CardData("Basic Defend", "Block 3 damage each turn for 2 turns.", 1, CardData.Tools.MakeDefend(3, 1, 2));
-        CardData card4 = new CardData("Quick Defend", "Block 5 damage each turn for 1 turn.", 1, CardData.Tools.MakeDefend(5, 2, 1));
+        CardData card1 = new CardData("Basic Attack", "Deal 4 damage each turn for 2 turns.", CardData.Type.ATTACK, CardData.Element.SLUDGE, 1, 4, 0, 2, 0);
+        CardData card2 = new CardData("Slow Attack", "Deal 2 damage each turn for 5 turns.", CardData.Type.ATTACK, CardData.Element.SLUDGE, 1, 2, 0, 5, 0);
+        CardData card3 = new CardData("Basic Defend", "Block 3 damage each turn for 2 turns.", CardData.Type.DEFEND, CardData.Element.SLUDGE, 1, 0, 3, 5, 0);
+        CardData card4 = new CardData("Quick Defend", "Block 5 damage each turn for 1 turn.", CardData.Type.DEFEND, CardData.Element.SLUDGE, 1, 0, 5, 1, 0);
+
+        // CardData card1 = new CardData("Basic Attack", "Deal 4 damage each turn for 2 turns.", 1, CardData.Tools.MakeAttack(4,2));
+        // CardData card2 = new CardData("Slow Attack", "Deal 2 damage each turn for 5 turns.", 1, CardData.Tools.MakeAttack(2, 5));
+        // CardData card3 = new CardData("Basic Defend", "Block 3 damage each turn for 2 turns.", 1, CardData.Tools.MakeDefend(3, 1, 2));
+        // CardData card4 = new CardData("Quick Defend", "Block 5 damage each turn for 1 turn.", 1, CardData.Tools.MakeDefend(5, 2, 1));
 
         for (int i = 0; i < 3;i++) {
             player1.AddToDeck(card1);

@@ -189,10 +189,10 @@ public class BattleField : MonoBehaviour
     /// <param name="direction">player to deal damage to; 0-> first player, 1-> second player</param>
     /// <param name="dmg">amount of damage to deal</param>
     /// <param name="affliction">2-element affliction array</param>
-    public void TakeAfflictionDamage(int direction, int dmg, int[] affliction) {
+    public void TakeAfflictionDamage(int direction, int dmg, int[] affliction, CardData.Element element) {
         if (affliction[0] != -1) {
             foreach (Ability.Defend defense in abilities[direction,ABILITIES.DEFENDS]) {
-                if (defense.isElement((byte)affliction[0])) {
+                if (defense.isElement(element)) {
                     // this one takes damage, do not deal affliction
                     dmg -= defense.TakeDamage(dmg);
                     if (dmg > 0) {

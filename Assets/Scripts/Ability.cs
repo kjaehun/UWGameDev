@@ -1,16 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static CardData.Element;
 
 public class Ability
-{
-    public static class Codes {
-        public static readonly int ATTACK = 1;
-        public static readonly int DEFEND = 2;
-        public static readonly int OTHER = 3;
-    }
-    
+{   
     protected int numTurns;
+    protected CardData.Element element;
 
     public Ability(int lifespan) {
         this.numTurns = lifespan;
@@ -35,11 +31,17 @@ public class Ability
     public class Attack : Ability {
         private int dmg;
 
-        private int[] affliction; // [0] -> key; [1] -> amount
+        /* private int[] affliction; // [0] -> key; [1] -> amount
 
         public Attack(int dmg, int[] affliction, int lifespan) : base(lifespan) {
             this.dmg = dmg;
             this.affliction = affliction;
+        }
+        */
+
+        public Attack(int dmg, CardData.Element element, int lifespan) : base(lifespan) {
+            this.dmg = dmg;
+            this.element = element;
         }
 
         public void DealDamage(int direction, BattleField field) {
@@ -57,9 +59,17 @@ public class Ability
         private int maxDef;
         private int currentDef;
 
-        private byte element;
+        // private byte element;
 
-        public Defend(int def, byte element, int lifespan) : base(lifespan) {
+        // public Defend(int def, byte element, int lifespan) : base(lifespan) {
+        //     this.maxDef = def;
+        //     this.currentDef = def;
+
+        //     this.element = element;
+        // }
+
+
+        public Defend(int def, CardData.Element element, int lifespan) : base(lifespan) {
             this.maxDef = def;
             this.currentDef = def;
 
@@ -74,7 +84,7 @@ public class Ability
             return dmg;
         }
 
-        public bool isElement(byte element) {
+        public bool isElement(CardData.Element element) {
             return (this.element == element);
         }
 
@@ -83,4 +93,7 @@ public class Ability
             return currentDef;
         }
     }
+
+    // TODO
+    // implement functions for each skill categories (e.g. draw more cards, reduce enemy mana next turn, etc)
 }

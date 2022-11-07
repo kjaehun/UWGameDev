@@ -4,17 +4,39 @@ using UnityEngine;
 
 public class CardData
 {
+    public enum Type {
+        ATTACK,
+        DEFEND,
+        SKILL
+    }
+
+    public enum Element {
+        SMOG,
+        SLUDGE,
+        RADIOACTIVITY,
+        WATER,
+        OIL
+    }
+
     GameObject physicalCard;
 
     private string cardName;
     private string description;
 
-    private byte cardElement; // smog, sludge, radioactivity, water, oil
-    private byte cardType; // attack, defend, skill
+    /// private byte cardElement; // smog, sludge, radioactivity, water, oil
+    /// private byte cardType; // attack, defend, skill
     private int manaCost;
+    private Type type;
+    private Element element;
+
+    // if unapplicable, set to 0 (e.g. defend cards should have 0 dmg)
+    private int dmg;
+    private int def;
+    private int duration;
+    private int skill; // 0 if not a skill, some other integer if it is a skill (maybe map it to different triggers?)
 
     private PlayerData owner;
-
+/*
     private static class IndexCodes {
         public static readonly int TYPE = 0;
         public static readonly int LIFESPAN = 1;
@@ -23,17 +45,22 @@ public class CardData
         public static readonly int SVAL = 4; // secondary value. used for things like denoting affliction amount
     }
     private int[,] vals;
-
+*/
     public string getName() {return cardName;}
     public string getDescription() {return description;}
-    public byte getCardType() {return cardType;}
+    public Type getCardType() {return type;}
     public int getManaCost() {return manaCost;}
 
-    public CardData(string name, string description, int manaCost, int[,] vals) {
+    public CardData(string name, string description, Type type, Element element, int manaCost, int dmg, int def, int duration, int skill) {
         this.cardName = name;
         this.description = description;
+        this.type = type;
+        this.element = element;
         this.manaCost = manaCost;
-        this.vals = vals;
+        this.dmg = dmg;
+        this.def = def;
+        this.duration = duration;
+        this.skill = skill;
     }
 
     public void PlayCard(int player, BattleField field) {
@@ -54,32 +81,18 @@ public class CardData
     
     public List<Ability> FormatAbilities() {
         List<Ability> abilities = new List<Ability>();
-        for (int i=0;i<vals.GetLength(0);i++) {
-            if (vals[i,IndexCodes.TYPE] == Ability.Codes.ATTACK) {
-
-                int dmg = vals[i,IndexCodes.PVAL];
-                int[] affliction = new int[2] {vals[i,IndexCodes.SKEY],vals[i,IndexCodes.SVAL]};
-                int duration = vals[i,IndexCodes.LIFESPAN];
-
-
-                Ability.Attack attack = new Ability.Attack(dmg,affliction,duration);
+        switch(type) {
+            case Type.ATTACK:
+                Ability.Attack attack = new Ability.Attack(dmg,element,duration);
                 abilities.Add(attack);
-
-            } else if (vals[i,IndexCodes.TYPE] == Ability.Codes.DEFEND) {
-
-                int def = vals[i,IndexCodes.PVAL];
-                int duration = vals[i,IndexCodes.LIFESPAN];
-                byte element = (byte) vals[i,IndexCodes.SKEY];
-
-
-                Ability.Defend defend = new Ability.Defend(def, element, duration);
+                break;
+            case Type.DEFEND:
+                Ability.Defend defend = new Ability.Defend(def,element,duration);
                 abilities.Add(defend);
-
-            } else if (vals[i,IndexCodes.TYPE] == Ability.Codes.OTHER) {
-                // Do nothing just yet... TODO when other types of abilities are implemented
-            }
+                break;
+            // TODO
+            // case SKILL:
         }
-
         return abilities;
     }
 
@@ -114,28 +127,6 @@ public class CardData
 
     }
 
-
-
-    public static class Tools {
-        public static int[,] MakeAttack(int dmg, int afflictionKey, int afflictionAmount, int duration) {
-            return new int[1, 5] {
-                {Ability.Codes.ATTACK,duration,dmg,afflictionKey,afflictionAmount}
-            };
-        }
-        public static int[,] MakeAttack(int dmg, int duration) {
-            return MakeAttack(dmg, -1, 0, duration);
-        }
-        public static int[,] MakeDefend(int def, int element, int duration) {
-            return new int[1, 5] {
-                {Ability.Codes.DEFEND,duration,def,element,0}
-            };
-        }
-    }
-
-    public CardData clone() {
-        return new CardData(this.cardName, this.description, this.manaCost, this.vals);
-    }
-
     public void setOwner(PlayerData owner) {
         this.owner = owner;
     }
@@ -148,5 +139,7 @@ public class CardData
 
     public GameObject getPhysicalCard() { return physicalCard; }
 
-
+    public CardData clone() {
+        return new CardData(this.cardName, this.description, this.type, this.element, this.manaCost, this.dmg, this.def, this.duration, this.skill);
+    }
 }

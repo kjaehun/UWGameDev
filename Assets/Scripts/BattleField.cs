@@ -53,6 +53,7 @@ public class BattleField : MonoBehaviour
         if (ability is Ability.Attack) abilities[player,ABILITIES.ATTACKS].Add(ability);
         if (ability is Ability.Defend) abilities[player,ABILITIES.DEFENDS].Add(ability);
         else abilities[player,ABILITIES.OTHER].Add(ability);
+
     }
 
     /// <summary>

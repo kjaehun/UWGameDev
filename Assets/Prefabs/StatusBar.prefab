@@ -216,6 +216,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   backBar: {fileID: 3731832835404602381}
   frontBar: {fileID: 3548843560870079114}
-  maxSize: 2
+  maxSize: 5
   width: 0.1
   percent: 1

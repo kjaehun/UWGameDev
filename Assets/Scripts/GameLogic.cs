@@ -85,6 +85,10 @@ public class GameLogic : MonoBehaviour
 
         PlayerData.GetPlayer(0).ArrangeCardsInHand();
         PlayerData.GetPlayer(1).ArrangeCardsInHand();
+
+        // TODO change from literal '3' to something else to make alterable
+        PlayerData.GetPlayer(0).setMana(3);
+        PlayerData.GetPlayer(1).setMana(3);
     }
 
     public void EndTurns() {
@@ -107,7 +111,7 @@ public class GameLogic : MonoBehaviour
         // make battlefields
         for (int i = 0; i < 3;i++) {
             GameObject thing = GameObject.Instantiate(
-                GameAssets.inst.battleFieldPrefab, new Vector3(MathA.GetSpread(i, 3, 0, 4.0f), 0, 0), Quaternion.identity
+                GameAssets.inst.battleFieldPrefab, new Vector2(MathA.GetSpread(i, 3, 0, 4.1f), 0), Quaternion.identity
             );
 
             battleFields[i] = thing.GetComponent<BattleField>();

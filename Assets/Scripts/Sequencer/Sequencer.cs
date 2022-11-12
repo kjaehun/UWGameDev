@@ -327,7 +327,7 @@ public class Sequencer : MonoBehaviour
     }
 
     /// <summary>
-    /// A MethodEvent allows for ANY method with no parameter to be stored and ran in the Sequencer.
+    /// A MethodEvent allows for ANY method with no parameters to be stored and ran in the Sequencer.
     /// Note that this is a type of InstantEvent.
     /// </summary>
     public class MethodEvent : InstantEvent {
@@ -356,6 +356,43 @@ public class Sequencer : MonoBehaviour
         protected override void DoAction()
         {
             method();
+        }
+    }
+    /// <summary>
+    /// A FieldTakeDamageEvent allows for a field to take damage only when instructed from inside of the Sequencer.
+    /// </summary>
+    public class FieldTakeDamageEvent : InstantEvent
+    {
+        /// <summary>
+        /// Direction to deal damage.
+        /// 0-> player 1, 1-> player 2.
+        /// </summary>
+        int direction;
+        /// <summary>
+        /// Damage to deal.
+        /// </summary>
+        int dmg;
+        /// <summary>
+        /// BattleField to deal damage upon.
+        /// </summary>
+        BattleField field;
+        /// <summary>
+        /// Constructor for a FieldTakeDamageEvent.
+        /// </summary>
+        /// <param name="dir">direction to deal damage; 0-> first player, 1-> second player</param>
+        /// <param name="dmg">damage to deal</param>
+        /// <param name="field">BattleField which receives the damage</param>
+        public FieldTakeDamageEvent(int dir, int dmg, BattleField field) {
+            this.direction = dir;
+            this.dmg = dmg;
+            this.field = field;
+        }
+        /// <summary>
+        /// Defines DoAction to deal damage to the associated BattleField.
+        /// </summary>
+        protected override void DoAction()
+        {
+            field.TakeDamage(direction, dmg);
         }
     }
 }

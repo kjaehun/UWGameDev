@@ -54,6 +54,9 @@ public class BattleField : MonoBehaviour
         if (ability is Ability.Defend) abilities[player,ABILITIES.DEFENDS].Add(ability);
         else abilities[player,ABILITIES.OTHER].Add(ability);
 
+        AbilityRepresentation.MakeAbilityRepresentation(gameObject, ability);
+        ArrangeRepresentations();
+
     }
 
     /// <summary>
@@ -65,30 +68,40 @@ public class BattleField : MonoBehaviour
         for (int i=0;i<4;i++) {
             abilities[player,i].Remove(ability);
         }
+        ArrangeRepresentations();
     }
 
     /// <summary>
     /// Enacts the battle at this battle field.
     /// </summary>
     public void EnactBattle() {
+
         int playerPriority = CalculatePlayerPriority();
 
         EnactAfflictions(playerPriority);
 
         EnactAbilities(playerPriority);
 
+        Sequencer.Add(new Sequencer.MethodEvent(CleanField));
+    }
+
+    /// <summary>
+    /// Refreshes all defenses, decrements the turns on all abilities, and deletes expired abilities.
+    /// </summary>
+    public void CleanField() {
         for (int plyr=0; plyr < 2; plyr++) {
             for (int i = 0; i < abilities[plyr, 0].Count;i++) {
                 Ability ability = abilities[plyr, 0][i];
+                ability.refresh();
                 ability.DecrementTurns();
                 if (ability.getExpired())
                 {
                     RemoveAbility(plyr, ability);
+                    ability.DestroyRepresentation();
                     i--;
                 }
             }
         }
-        
     }
 
     /// <summary>
@@ -250,6 +263,26 @@ public class BattleField : MonoBehaviour
         for (int i = 0; i < abilities.GetLength(0);i++) {
             for (int j = 0; j < abilities.GetLength(1);j++) {
                 abilities[i, j] = new List<Ability>();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Places all the ability representations at their proper places on the battle field.
+    /// </summary>
+    public void ArrangeRepresentations() {
+        Vector2 battleFieldSize = new Vector2(4, 5.7f);
+        float h = battleFieldSize.y / 4;
+        float w = battleFieldSize.x / 2;
+        int stackAmount = 4;
+
+        for (int side = 0; side < abilities.GetLength(0);side++) {
+            List<Ability> list = abilities[side, ABILITIES.ALL];
+            for (int index = 0; index < list.Count;index++) {
+                float y = MathA.GetSpread(index / stackAmount, (list.Count-1) / stackAmount,  h * (2*side-1), 1f);
+                float x = MathA.GetSpread(index % stackAmount, stackAmount, 0, 1f);
+
+                list[index].setRepresentationPosition(new Vector2(x, y));
             }
         }
     }

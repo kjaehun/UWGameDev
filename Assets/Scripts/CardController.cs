@@ -75,6 +75,7 @@ public class CardController : MonoBehaviour
     /// <param name="card">CardData to store</param>
     public void Setup(CardData card) {
         this.card = card;
+        gameObject.name = "Card: " + card.getName();
         UpdateVisuals();
     }
 

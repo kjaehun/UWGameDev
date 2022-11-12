@@ -7,6 +7,7 @@ using TMPro;
 public class UIScript : MonoBehaviour
 {
     public static UIScript instance;
+    public static Canvas canvas;
 
     [SerializeField] 
     private TextMeshProUGUI manaAmountHolder;
@@ -15,6 +16,14 @@ public class UIScript : MonoBehaviour
 
     void Awake() {
         instance = this;
+        canvas = gameObject.GetComponent<Canvas>();
+    }
+
+    public void SetMana(int val) {
+        manaAmountHolder.text = "" + val;
+    }
+    public void SetMaxMana(int val) {
+        maxManaHolder.text = ""+val;
     }
 
 

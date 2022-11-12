@@ -43,9 +43,13 @@ public class PlayerData
 
     /// <summary>
     /// Player healthbar.
-    /// TODO change this system
     /// </summary>
-    private StatusBarController healthBar;
+    private HealthBarController healthBar;
+
+    /// <summary>
+    /// Determines if this is the currently controlled player.
+    /// </summary>
+    private bool currentPlayer;
 
     /// <summary>
     /// Getter for health.
@@ -160,7 +164,7 @@ public class PlayerData
     public void TakeDamage(int dmg) {
         health -= Mathf.Min(health,dmg);
 
-        healthBar.SetPercent((float)(health)/(float)(maxHealth));
+        healthBar.SetValues(health, maxHealth);
     }
 
     /// <summary>
@@ -196,6 +200,9 @@ public class PlayerData
     /// <param name="val">amount to change mana by</param>
     public void changeMana(int val) {
         mana -= val;
+        if (currentPlayer) {
+            UIScript.instance.SetMana(mana);
+        }
     }
     /// <summary>
     /// Sets mana to the amount provided.
@@ -203,6 +210,9 @@ public class PlayerData
     /// <param name="val">new value for mana</param>
     public void setMana(int val) {
         mana = val;
+        if (currentPlayer) {
+            UIScript.instance.SetMana(mana);
+        }
     }
 
     /// <summary>
@@ -217,7 +227,7 @@ public class PlayerData
     /// Sets the healh bar field to a provided health bar.
     /// </summary>
     /// <param name="healthBar">health bar to store</param>
-    public void SetHealthBar(StatusBarController healthBar) {
+    public void SetHealthBar(HealthBarController healthBar) {
         this.healthBar = healthBar;
     }
 
@@ -260,6 +270,17 @@ public class PlayerData
                 hand[i].getPhysicalCard(), 
                 new Vector2(MathA.GetSpread(i, hand.Count, 0, 2.1f), MathA.GetSpread(getID(), 2, 0, 10)), 
                 0.5f);
+        }
+    }
+
+    public static void SetControllingPlayer(int index) {
+        for (int i = 0; i < players.Length;i++) {
+            if (i == index)
+            {
+                players[i].currentPlayer = true;
+                UIScript.instance.SetMana(players[i].mana);
+            }
+            else players[i].currentPlayer = false;
         }
     }
 }

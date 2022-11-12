@@ -85,6 +85,7 @@ public class MathA : MonoBehaviour
     /// <param name="dist">distance between each object in the spread from its neighbor(s)</param>
     /// <returns>the coordinate of this object along the associated axis within the spread</returns>
     public static float GetSpread(int index, int maxNum, float center, float dist) {
+        if (maxNum < 0) maxNum = 0;
         return center + index * dist - dist * (maxNum - 1) / 2.0f;
     }
 

@@ -142,22 +142,21 @@ public class CardData
     }
 
     /// <summary>
-    /// Legacy. TODO change
+    /// If dmg, def, or skill are positive, returns an ability associated with that value
     /// </summary>
     /// <returns></returns>
     public List<Ability> FormatAbilities() {
         List<Ability> abilities = new List<Ability>();
-        switch(type) {
-            case Type.ATTACK:
-                Ability.Attack attack = new Ability.Attack(dmg,element,duration);
-                abilities.Add(attack);
-                break;
-            case Type.DEFEND:
-                Ability.Defend defend = new Ability.Defend(def,element,duration);
-                abilities.Add(defend);
-                break;
-            // TODO
-            // case SKILL:
+        if (this.dmg > 0) {
+            Ability.Attack attack = new Ability.Attack(dmg,element,duration);
+            abilities.Add(attack);
+        }
+        if (this.def > 0) {
+            Ability.Defend defend = new Ability.Defend(def,element,duration);
+            abilities.Add(defend);
+        }
+        if (this.skill > 0) {
+            ; //TODO
         }
         return abilities;
     }

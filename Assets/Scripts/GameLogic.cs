@@ -68,13 +68,14 @@ public class GameLogic : MonoBehaviour
 
     public void StartBattle() {
         PlayerData[] players = new PlayerData[2] { PlayerData.GetPlayer(0), PlayerData.GetPlayer(1) };
-        players[0].SetHealthBar(StatusBarController.GenerateBar(gameObject, 3.5f*Vector2.down));
-        players[1].SetHealthBar(StatusBarController.GenerateBar(gameObject, 3.5f*Vector2.up));
+        players[0].SetHealthBar(HealthBarController.MakeHealthBar(0,30));
+        players[1].SetHealthBar(HealthBarController.MakeHealthBar(1,30));
 
         players[0].PrepareCards();
         players[1].PrepareCards();
 
         controllingPlayerIndex = 0;
+        PlayerData.SetControllingPlayer(controllingPlayerIndex);
     }
 
     public void StartTurn() {
@@ -104,7 +105,7 @@ public class GameLogic : MonoBehaviour
         } else if (!PlayerData.GetPlayer(1).isAlive()) {
             Debug.Log("Player 1 wins!");
         }
-        StartTurn();
+        Sequencer.Add(new Sequencer.MethodEvent(StartTurn));
     }
 
     void Start() {
@@ -128,6 +129,8 @@ public class GameLogic : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.G)) {
             controllingPlayerIndex = 1 - controllingPlayerIndex;
             Debug.Log("Controlling player: " + controllingPlayerIndex);
+
+            PlayerData.SetControllingPlayer(controllingPlayerIndex);
         }
 
         if (Input.GetKeyDown(KeyCode.E)) {

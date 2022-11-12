@@ -37,7 +37,7 @@ public class GameAssets : MonoBehaviour
     /// <summary>
     /// Prefab for a health bar.
     /// </summary>
-    public GameObject statusBarPrefab;
+    public GameObject healthBar;
     /// <summary>
     /// Prefab for a physical card.
     /// </summary>
@@ -46,6 +46,8 @@ public class GameAssets : MonoBehaviour
     /// Prefab for a battle field.
     /// </summary>
     public GameObject battleFieldPrefab;
+
+    public GameObject[] abilityRepresentationPrefabs;
 
     /// <summary>
     /// Called by Unity prior to the first frame.

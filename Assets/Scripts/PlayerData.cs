@@ -4,11 +4,36 @@ using UnityEngine;
 
 public class PlayerData
 {
+    #region static fields
     /// <summary>
     /// Holds both players.
     /// </summary>
     private static PlayerData[] players = new PlayerData[2];
+    #endregion
 
+    #region static getters and setters
+    /// <summary>
+    /// Gets a player depending on their index.
+    /// </summary>
+    /// <param name="n">0-> player 1, 1-> player 2</param>
+    /// <returns>the PlayerData at the associated index in the players array</returns>
+    public static PlayerData GetPlayer(int n) {
+        if (n<0 || n>1) return null;
+        return players[n];
+    }
+    public static void SetControllingPlayer(int index) {
+        for (int i = 0; i < players.Length;i++) {
+            if (i == index)
+            {
+                players[i].currentPlayer = true;
+                UIScript.instance.SetMana(players[i].mana);
+            }
+            else players[i].currentPlayer = false;
+        }
+    }
+    #endregion
+
+    #region instance fields
     /// <summary>
     /// Contains all cards within a player's deck.
     /// </summary>
@@ -51,84 +76,14 @@ public class PlayerData
     /// </summary>
     private bool currentPlayer;
 
+    #endregion
+
+    #region getters and setters
     /// <summary>
     /// Getter for health.
     /// </summary>
     /// <returns>health of player</returns>
     public int getHealth() {return health;}
-
-    /// <summary>
-    /// Constructor for a PlayerData object.
-    /// Initializes all fields and stores this player in the players array.
-    /// </summary>
-    /// <param name="hp">starting health</param>
-    public PlayerData(int hp) {
-        deck = new List<CardData>();
-
-        drawPile = new List<CardData>();
-        hand = new List<CardData>();
-        discard = new List<CardData>();
-
-        this.health = hp;
-        this.maxHealth = hp;
-
-        mana = 3;
-
-        if (players[0] == null) players[0] = this;
-        else players[1] = this;
-
-    }
-    /// <summary>
-    /// Overloading constructor for a PlayerData object which provides a default of 30 health.
-    /// </summary>
-    public PlayerData() : this(30) {}
-
-    /// <summary>
-    /// Draws a card from the draw pile and places it into the hand.
-    /// Builds a physical card for the drawn card.
-    /// </summary>
-    public void DrawCard() {
-        if (drawPile.Count == 0) {
-            ShuffleDiscardIntoDraw();
-        }
-        if (drawPile.Count == 0) return;
-
-        CardData card = drawPile[drawPile.Count-1];
-        drawPile.RemoveAt(drawPile.Count-1);
-        hand.Add(card);
-
-        card.setOwner(this);
-
-        card.MakePhysicalCard(new Vector2(0,-3));
-    }
-
-    /// <summary>
-    /// Shuffles the discard pile into the draw pile.
-    /// </summary>
-    public void ShuffleDiscardIntoDraw() {
-        while (discard.Count > 0) {
-            CardData card = discard[discard.Count-1];
-            drawPile.Add(card);
-            discard.RemoveAt(discard.Count-1);
-        }
-        CardData.Shuffle(drawPile);
-    }
-
-    /// <summary>
-    /// Initializes the draw pile, hand, and discard pile prior to a match.
-    /// Should be used before starting any match.
-    /// </summary>
-    public void PrepareCards() {
-        drawPile = new List<CardData>();
-        hand = new List<CardData>();
-        discard = new List<CardData>();
-
-        foreach (CardData card in deck) {
-            drawPile.Add(card);
-        }
-        CardData.Shuffle(drawPile);
-    }
-
     /// <summary>
     /// Determines whether the player is alive.
     /// A player is alive iff his/her health is greater than 0.
@@ -137,46 +92,6 @@ public class PlayerData
     public bool isAlive() {
         return (health > 0);
     }
-
-    /// <summary>
-    /// Allows the player to attempt to play a card.
-    /// If the player has the required amount of mana, the card will be played and the mana will be drained.
-    /// If the player does not have the required amount of mana, nothing happens.
-    /// </summary>
-    /// <param name="field">BattleField in which the card was played</param>
-    /// <param name="card">card which the player is trying to play</param>
-    public void AttemptPlayCard(BattleField field, CardData card) {
-        if (hasMana(card.getManaCost())) {
-
-            card.PlayCard(getID(),field);
-
-            changeMana(card.getManaCost());
-
-            DiscardCard(card);
-
-        }
-    }
-
-    /// <summary>
-    /// Allows for the player to take damage. Updates health bar.
-    /// </summary>
-    /// <param name="dmg">damage to take</param>
-    public void TakeDamage(int dmg) {
-        health -= Mathf.Min(health,dmg);
-
-        healthBar.SetValues(health, maxHealth);
-    }
-
-    /// <summary>
-    /// Gets a player depending on their index.
-    /// </summary>
-    /// <param name="n">0-> player 1, 1-> player 2</param>
-    /// <returns>the PlayerData at the associated index in the players array</returns>
-    public static PlayerData GetPlayer(int n) {
-        if (n<0 || n>1) return null;
-        return players[n];
-    }
-
     /// <summary>
     /// Determines whether a card is in this player's hand.
     /// </summary>
@@ -185,7 +100,6 @@ public class PlayerData
     public bool isInHand(CardData card) {
         return hand.Contains(card);
     }
-
     /// <summary>
     /// Determines whether the player has the amount of mana provided.
     /// </summary>
@@ -214,23 +128,13 @@ public class PlayerData
             UIScript.instance.SetMana(mana);
         }
     }
-
-    /// <summary>
-    /// Adds a CLONE of the card to the deck.
-    /// </summary>
-    /// <param name="card">card to add to deck</param>
-    public void AddToDeck(CardData card) {
-        deck.Add(card.clone());
-    }
-
     /// <summary>
     /// Sets the healh bar field to a provided health bar.
     /// </summary>
     /// <param name="healthBar">health bar to store</param>
-    public void SetHealthBar(HealthBarController healthBar) {
+    public void setHealthBar(HealthBarController healthBar) {
         this.healthBar = healthBar;
     }
-
     /// <summary>
     /// Gets this player's ID.
     /// </summary>
@@ -239,7 +143,100 @@ public class PlayerData
         if (this.Equals(players[0])) return 0;
         return 1;
     }
+    #endregion
 
+    #region constructors
+    /// <summary>
+    /// Constructor for a PlayerData object.
+    /// Initializes all fields and stores this player in the players array.
+    /// </summary>
+    /// <param name="hp">starting health</param>
+    public PlayerData(int hp) {
+        deck = new List<CardData>();
+
+        drawPile = new List<CardData>();
+        hand = new List<CardData>();
+        discard = new List<CardData>();
+
+        this.health = hp;
+        this.maxHealth = hp;
+
+        mana = 3;
+
+        if (players[0] == null) players[0] = this;
+        else players[1] = this;
+
+    }
+    /// <summary>
+    /// Overloading constructor for a PlayerData object which provides a default of 30 health.
+    /// </summary>
+    public PlayerData() : this(30) {}
+    #endregion
+
+    #region match playing methods
+    /// <summary>
+    /// Draws a card from the draw pile and places it into the hand.
+    /// Builds a physical card for the drawn card.
+    /// </summary>
+    public void DrawCard() {
+        if (drawPile.Count == 0) {
+            ShuffleDiscardIntoDraw();
+        }
+        if (drawPile.Count == 0) return;
+
+        CardData card = drawPile[drawPile.Count-1];
+        drawPile.RemoveAt(drawPile.Count-1);
+        hand.Add(card);
+
+        card.setOwner(this);
+
+        card.MakePhysicalCard(new Vector2(0,-3));
+    }
+
+    /// <summary>
+    /// Shuffles the discard pile into the draw pile.
+    /// </summary>
+    public void ShuffleDiscardIntoDraw() {
+        while (discard.Count > 0) {
+            CardData card = discard[discard.Count-1];
+            drawPile.Add(card);
+            discard.RemoveAt(discard.Count-1);
+        }
+        MathA.Shuffle(drawPile);
+    }
+    /// <summary>
+    /// Initializes the draw pile, hand, and discard pile prior to a match.
+    /// Should be used before starting any match.
+    /// </summary>
+    public void PrepareCards() {
+        drawPile = new List<CardData>();
+        hand = new List<CardData>();
+        discard = new List<CardData>();
+
+        foreach (CardData card in deck) {
+            drawPile.Add(card);
+        }
+        MathA.Shuffle(drawPile);
+    }
+
+    /// <summary>
+    /// Allows the player to attempt to play a card.
+    /// If the player has the required amount of mana, the card will be played and the mana will be drained.
+    /// If the player does not have the required amount of mana, nothing happens.
+    /// </summary>
+    /// <param name="field">BattleField in which the card was played</param>
+    /// <param name="card">card which the player is trying to play</param>
+    public void AttemptPlayCard(BattleField field, CardData card) {
+        if (hasMana(card.getManaCost())) {
+
+            card.PlayCard(getID(),field);
+
+            changeMana(card.getManaCost());
+
+            DiscardCard(card);
+
+        }
+    }
     /// <summary>
     /// Moves a card from the hand to the discard pile.
     /// Destroys the attached physical card.
@@ -259,6 +256,26 @@ public class PlayerData
     public void DiscardHand() {
         while (hand.Count > 0) DiscardCard(hand[0]);
     }
+    #endregion
+
+    #region general game methods
+    /// <summary>
+    /// Allows for the player to take damage. Updates health bar.
+    /// </summary>
+    /// <param name="dmg">damage to take</param>
+    public void TakeDamage(int dmg) {
+        health -= Mathf.Min(health,dmg);
+
+        healthBar.SetValues(health, maxHealth);
+    }
+    /// <summary>
+    /// Adds a CLONE of the card to the deck.
+    /// </summary>
+    /// <param name="card">card to add to deck</param>
+    public void AddToDeck(CardData card) {
+        deck.Add(card.clone());
+    }
+    #endregion
 
     /// <summary>
     /// Physically arranges all cards in hand to make them visually appealing.
@@ -270,17 +287,6 @@ public class PlayerData
                 hand[i].getPhysicalCard(), 
                 new Vector2(MathA.GetSpread(i, hand.Count, 0, 2.1f), MathA.GetSpread(getID(), 2, 0, 10)), 
                 0.5f);
-        }
-    }
-
-    public static void SetControllingPlayer(int index) {
-        for (int i = 0; i < players.Length;i++) {
-            if (i == index)
-            {
-                players[i].currentPlayer = true;
-                UIScript.instance.SetMana(players[i].mana);
-            }
-            else players[i].currentPlayer = false;
         }
     }
 }

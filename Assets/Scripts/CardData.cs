@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CardData
 {
+    #region enums
     /// <summary>
     /// Data type to determine the type of a card.
     /// </summary>
@@ -22,11 +23,14 @@ public class CardData
         WATER,
         OIL
     }
+    #endregion
+
+    #region instance fields
 
     /// <summary>
     /// Associated physical card of this specific data. If null, then no physical manifestation exists.
     /// </summary>
-    GameObject physicalCard;
+    private GameObject physicalCard;
 
     /// <summary>
     /// Name of the card.
@@ -70,9 +74,10 @@ public class CardData
     /// Reference to the owner of this card.
     /// </summary>
     private PlayerData owner;
-/*
-    private int[,] vals;
-*/
+
+    #endregion
+
+    #region getters and setters
     /// <summary>
     /// Getter for the name.
     /// </summary>
@@ -94,6 +99,37 @@ public class CardData
     /// <returns>mana cost of card</returns>
     public int getManaCost() {return manaCost;}
 
+    /// <summary>
+    /// Sets the owner of this card.
+    /// </summary>
+    /// <param name="owner">PlayerData to make owner</param>
+    public void setOwner(PlayerData owner) {
+        this.owner = owner;
+    }
+
+    /// <summary>
+    /// Getter for card owner.
+    /// </summary>
+    /// <returns>owner of card as PlayerData</returns>
+    public PlayerData getOwner() { return owner; }
+
+    /// <summary>
+    /// Getter for physical card as a GameObject. If null, no such object exists.
+    /// </summary>
+    /// <returns>physical card of this card</returns>
+    public GameObject getPhysicalCard() { return physicalCard; }
+
+    /// <summary>
+    /// String representation of card. Used for debugging.
+    /// </summary>
+    /// <returns>string version of card</returns>
+    public override string ToString() {
+        return "Card: " + cardName;
+    }
+
+    #endregion
+
+    #region constructors
     /// <summary>
     /// Constructor for a CardData instance.
     /// </summary>
@@ -117,7 +153,44 @@ public class CardData
         this.duration = duration;
         this.skill = skill;
     }
+    /// <summary>
+    /// Creates an identical copy of this data. 
+    /// This allows for many different physical cards to exist which have the same data.
+    /// This, however, does mean that all these cards have distinct CardData instances.
+    /// </summary>
+    /// <returns>new CardData following clone</returns>
+    public CardData clone() {
+        return new CardData(this.cardName, this.description, this.type, this.element, this.manaCost, this.dmg, this.def, this.duration, this.skill);
+    }
+    #endregion
 
+    #region physical card methods
+    /// <summary>
+    /// Constructs a physical manifestation of this card at a location in the world.
+    /// </summary>
+    /// <param name="pos">location to place card</param>
+    public void MakePhysicalCard(Vector2 pos) {
+        if (physicalCard != null) GameObject.Destroy(physicalCard);
+        
+        physicalCard = GameObject.Instantiate(GameAssets.inst.cardPrefab, pos, Quaternion.identity);
+        physicalCard.GetComponent<CardController>().Setup(this);
+    }
+    /// <summary>
+    /// Constructs a physical manifestation of this card at an arbitrary locataion in the world.
+    /// </summary>
+    public void MakePhysicalCard() {
+        MakePhysicalCard(Vector2.zero);
+    }
+    /// <summary>
+    /// Destroys the physical card associated with this card.
+    /// </summary>
+    public void DestroyPhysicalCard() {
+        GameObject.Destroy(physicalCard);
+        physicalCard = null;
+    }
+    #endregion
+
+    #region methods for playing cards
     /// <summary>
     /// Plays a card from a certain player onto the battle field.
     /// </summary>
@@ -131,14 +204,6 @@ public class CardData
         }
 
         DestroyPhysicalCard();
-    }
-
-    /// <summary>
-    /// Destroys the physical card associated with this card.
-    /// </summary>
-    public void DestroyPhysicalCard() {
-        GameObject.Destroy(physicalCard);
-        physicalCard = null;
     }
 
     /// <summary>
@@ -160,83 +225,6 @@ public class CardData
         }
         return abilities;
     }
-
-    /// <summary>
-    /// Constructs a physical manifestation of this card at a location in the world.
-    /// </summary>
-    /// <param name="pos">location to place card</param>
-    public void MakePhysicalCard(Vector2 pos) {
-        if (physicalCard != null) GameObject.Destroy(physicalCard);
-        
-        physicalCard = GameObject.Instantiate(GameAssets.inst.cardPrefab, pos, Quaternion.identity);
-        physicalCard.GetComponent<CardController>().Setup(this);
-    }
-    /// <summary>
-    /// Constructs a physical manifestation of this card at an arbitrary locataion in the world.
-    /// </summary>
-    public void MakePhysicalCard() {
-        MakePhysicalCard(Vector2.zero);
-    }
-
-
-    /// <summary>
-    /// Shuffles a list of cards, making their order approximately random.
-    /// </summary>
-    /// <param name="list"></param>
-    public static void Shuffle(List<CardData> list) {
-        // option 1: make a random, injective transformation T: [0, list.length-1] -> [0, list.length-1]
-        // option 2: fuckshit method
-        //      option 2 is much easier
-        int thoroughness = 3;
-
-        for (int z=0;z<thoroughness;z++) {
-            for (int i=0; i<list.Count;i++) {
-                int removeIndex = Random.Range(0,list.Count);
-                int addIndex = Random.Range(0, list.Count);
-
-                CardData removedCard = list[removeIndex];
-                list.RemoveAt(removeIndex);
-                list.Insert(addIndex, removedCard);
-            }
-        }
-
-    }
-
-    /// <summary>
-    /// Sets the owner of this card.
-    /// </summary>
-    /// <param name="owner">PlayerData to make owner</param>
-    public void setOwner(PlayerData owner) {
-        this.owner = owner;
-    }
-
-    /// <summary>
-    /// Getter for card owner.
-    /// </summary>
-    /// <returns>owner of card as PlayerData</returns>
-    public PlayerData getOwner() { return owner; }
-
-    /// <summary>
-    /// String representation of card. Used for debugging.
-    /// </summary>
-    /// <returns>string version of card</returns>
-    public override string ToString() {
-        return "Card: " + cardName;
-    }
-
-    /// <summary>
-    /// Getter for physical card as a GameObject. If null, no such object exists.
-    /// </summary>
-    /// <returns>physical card of this card</returns>
-    public GameObject getPhysicalCard() { return physicalCard; }
-
-    /// <summary>
-    /// Creates an identical copy of this data. 
-    /// This allows for many different physical cards to exist which have the same data.
-    /// This, however, does mean that all these cards have distinct CardData instances.
-    /// </summary>
-    /// <returns>new CardData following clone</returns>
-    public CardData clone() {
-        return new CardData(this.cardName, this.description, this.type, this.element, this.manaCost, this.dmg, this.def, this.duration, this.skill);
-    }
+    #endregion
+    
 }

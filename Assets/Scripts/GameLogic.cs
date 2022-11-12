@@ -4,23 +4,41 @@ using UnityEngine;
 using static CardData.Element;
 using static CardData.Type;
 
+/// <summary>
+/// Controls the basic logical flow of a match.
+/// Manages the following:
+/// 1. starting battles, initializing players
+/// 2. ending turns
+/// 3. running combat
+/// 4. determining when the battle is over
+/// </summary>
 public class GameLogic : MonoBehaviour
 {
+    /// <summary>
+    /// Used for "instance" strategy.
+    /// </summary>
     public static GameLogic instance;
-    /*
-    needs to manage the following:
-    1. starting battles, initializing players
-    2. ending turns
-    3. running combat
-    4. determining when the battle is over
-    */
 
-    // legacy system
+    // legacy system -- change these
+    /// <summary>
+    /// Current card which the player is manipulating.
+    /// </summary>
     private CardData controlledCard;
+    /// <summary>
+    /// Used to (attempt) to ensure that only one card may be dragged at once.
+    /// </summary>
     private bool controlledCardChanged;
 
+    /// <summary>
+    /// Index of player who currently has control over the game.
+    /// Ex: If controllingPlayerIndex = 0, then the user can move player 1's cards, play those cards, use his mana, etc..
+    /// </summary>
     private int controllingPlayerIndex;
 
+    /// <summary>
+    /// Array of all three battle fields present in the game.
+    /// Begins empty, but populated when a match begins.
+    /// </summary>
     BattleField[] battleFields = new BattleField[3];
 
     void Awake() {
@@ -33,6 +51,11 @@ public class GameLogic : MonoBehaviour
 
     //CardData(string name, string description, Type type, Element element, int manaCost, int dmg, int def, int duration, int skill)
 
+    /// <summary>
+    /// Starts a game. 
+    /// Basically what should happen when someone runs the .exe file.
+    /// Creates two players, initializes all the cards, adds cards to decks...
+    /// </summary>
     public void StartGame() {
         PlayerData player1 = new PlayerData();
         PlayerData player2 = new PlayerData();
@@ -65,11 +88,14 @@ public class GameLogic : MonoBehaviour
         }
             
     }
-
+    /// <summary>
+    /// Begins a battle between two players.
+    /// Generates the player health bars, prepares their cards, and sets up one player to take control.
+    /// </summary>
     public void StartBattle() {
         PlayerData[] players = new PlayerData[2] { PlayerData.GetPlayer(0), PlayerData.GetPlayer(1) };
-        players[0].SetHealthBar(HealthBarController.MakeHealthBar(0,30));
-        players[1].SetHealthBar(HealthBarController.MakeHealthBar(1,30));
+        players[0].setHealthBar(HealthBarController.MakeHealthBar(0,30));
+        players[1].setHealthBar(HealthBarController.MakeHealthBar(1,30));
 
         players[0].PrepareCards();
         players[1].PrepareCards();
@@ -77,7 +103,11 @@ public class GameLogic : MonoBehaviour
         controllingPlayerIndex = 0;
         PlayerData.SetControllingPlayer(controllingPlayerIndex);
     }
-
+    /// <summary>
+    /// Starts a turn.
+    /// Lets players draw all their cards and arranges them in the hand.
+    /// Resets the mana of both players.
+    /// </summary>
     public void StartTurn() {
         for (int i = 0; i < 5;i++){
             PlayerData.GetPlayer(0).DrawCard();
@@ -91,7 +121,10 @@ public class GameLogic : MonoBehaviour
         PlayerData.GetPlayer(0).setMana(3);
         PlayerData.GetPlayer(1).setMana(3);
     }
-
+    /// <summary>
+    /// Ends both players turns.
+    /// Enacts each battle field to determine what occurs.
+    /// </summary>
     public void EndTurns() {
         for (int i = 0; i < 2;i++) {
             PlayerData.GetPlayer(i).DiscardHand();
@@ -107,7 +140,12 @@ public class GameLogic : MonoBehaviour
         }
         Sequencer.Add(new Sequencer.MethodEvent(StartTurn));
     }
-
+    /// <summary>
+    /// Called by Unity on start.
+    /// Generates three battle fields.
+    /// TODO this is bad! Do NOT do it this way! 
+    /// The battle fields should be generated only when a match begins, and ought to be removed after.
+    /// </summary>
     void Start() {
         // make battlefields
         for (int i = 0; i < 3;i++) {
@@ -125,6 +163,10 @@ public class GameLogic : MonoBehaviour
         StartTurn();
     }
 
+    /// <summary>
+    /// Gets input from the player.
+    /// Currently only used for dev tools and moving cards around.
+    /// </summary>
     void Update() {
         if (Input.GetKeyDown(KeyCode.G)) {
             controllingPlayerIndex = 1 - controllingPlayerIndex;
@@ -151,11 +193,18 @@ public class GameLogic : MonoBehaviour
         controlledCardChanged = false;
     }
 
+    /// <summary>
+    /// Sets the card which the user is currently moving. legacy
+    /// </summary>
+    /// <param name="card">card being moved</param>
     public void SetControlledCard(CardData card) {
         this.controlledCard = card;
         this.controlledCardChanged = true;
     }
-
+    /// <summary>
+    /// Gets the player who is currently in control.
+    /// </summary>
+    /// <returns>PlayerData of controlling player</returns>
     public PlayerData getCurrentController() {
         return PlayerData.GetPlayer(controllingPlayerIndex);
     }

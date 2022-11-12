@@ -89,5 +89,29 @@ public class MathA : MonoBehaviour
         return center + index * dist - dist * (maxNum - 1) / 2.0f;
     }
 
+    /// <summary>
+    /// Shuffles a list of objects, making their order approximately random. Not super thorough, but sufficient.
+    /// </summary>
+    /// <typeparam name="T">object type used in list</typeparam>
+    /// <param name="list">list to shuffle</param>
+    public static void Shuffle<T>(List<T> list) {
+        // option 1: make a random, injective transformation T: [0, list.length-1] -> [0, list.length-1]
+        // option 2: fuckshit method
+        //      option 2 is much easier
+        int thoroughness = 3;
+
+        for (int z=0;z<thoroughness;z++) {
+            for (int i=0; i<list.Count;i++) {
+                int removeIndex = Random.Range(0,list.Count);
+                int addIndex = Random.Range(0, list.Count);
+
+                T removedElement = list[removeIndex];
+                list.RemoveAt(removeIndex);
+                list.Insert(addIndex, removedElement);
+            }
+        }
+
+    }
+
 
 }

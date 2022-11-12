@@ -1,0 +1,28 @@
+Jay:
+- changing ability
+Luke:
+- ui
+- physical manifestations of abilities
+- sequencer
+Wansoo:
+- Slay the Spire
+- Cards
+- Relationships btwn battlefields
+
+
+11 12 2022
+
+What we need:
+1. A way to "take back" cards - Luke
+2. Implementations for the other afflictions
+	- Slow
+	- Irradiated tiers 1 -> 3
+	- Flooded
+	- Covered
+3. Need to be able to apply afflictions through abilities - Jay
+4. Can only see the backs of players cards - Luke
+5. Revamp how cards are played from the hand - Nikhil
+	- Make cards move up slightly
+	- Make cards snap back after no longer being dragged
+	- Make stacking not occur
+6. Need card designs - Done today during meeting by all (Wansoo, Luke, Jay, Nikhil Pratshan)

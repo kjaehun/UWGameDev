@@ -1,0 +1,40 @@
+Nov 17 2022
+
+For this commit, I thought it would be a good idea to explain some of the systems I changed.
+
+1. Playing cards
+
+Presently, each card stores where it should be played in a field called 'playLocation'.
+The playLocation field is of type BattleField.
+All cards are played onto thier playLocation once the turns end.
+
+If playLocation is null, a card will simply not be played.
+If playLocation is not null, a card will be played onto the provided BattleField.
+
+This allows for cards to remain on the screen even after they are dragged onto a BattleField.
+Now, players can mess around with cards however they like & put them wherever they want,
+and their changes will only be committed once the turn is ended.
+
+2. Seeing the backs of opponent cards
+
+After players draw their cards, a "snapshot" is taken of the cards.
+Think of a "snapshot" like taking a picture of all the cards, but only a very specific picture.
+This picture only records which player owns each card and what type the card was.
+
+The snapshot is stored in cardBacksSnapshot.
+The array rows of cardBacksSnapshot correspond to ownership of the cards.
+The list columns of cardBackSnapshot correspond to unordered card types.
+
+One can use these types stored within the snapshot to display the backs of cards.
+Whenever the program renders cards to the screen, it references the snapshot to 
+know what to show for the back of the opponent cards.
+
+3. Rendering cards to the screen
+
+The program calls a method to render all cards to the screen.
+
+When cards are rendered, the snapshot is referenced to determine how to present
+the backs of opponents cards, along with the playLocation field to know where
+to position the player's cards.
+
+Cards are re-rendered whenever the player switches.

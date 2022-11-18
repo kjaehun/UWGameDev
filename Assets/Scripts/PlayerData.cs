@@ -2,6 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+Notes:
+- Consider using a LinkedList for cards. 
+  Could reduce runtime complexity, even though that's not something we have to worry about.
+*/
+
+
 public class PlayerData
 {
     #region static fields
@@ -21,6 +28,13 @@ public class PlayerData
         if (n<0 || n>1) return null;
         return players[n];
     }
+    /// <summary>
+    /// Returns the array containing both players.
+    /// </summary>
+    /// <returns>array of both players; player at index 0 -> player 1, player at index 1 -> player 2</returns>
+    public static PlayerData[] GetPlayers() {
+        return players;
+    }
     public static void SetControllingPlayer(int index) {
         for (int i = 0; i < players.Length;i++) {
             if (i == index)
@@ -32,7 +46,7 @@ public class PlayerData
         }
     }
     #endregion
-
+    
     #region instance fields
     /// <summary>
     /// Contains all cards within a player's deck.
@@ -143,6 +157,14 @@ public class PlayerData
         if (this.Equals(players[0])) return 0;
         return 1;
     }
+
+    /// <summary>
+    /// Getter for the cards in the player's hand.
+    /// </summary>
+    /// <returns>list containing all the cards in the player's hand</returns>
+    public List<CardData> getHand() {
+        return hand;
+    }
     #endregion
 
     #region constructors
@@ -187,10 +209,6 @@ public class PlayerData
         CardData card = drawPile[drawPile.Count-1];
         drawPile.RemoveAt(drawPile.Count-1);
         hand.Add(card);
-
-        card.setOwner(this);
-
-        card.MakePhysicalCard(new Vector2(0,-3));
     }
 
     /// <summary>
@@ -220,21 +238,33 @@ public class PlayerData
     }
 
     /// <summary>
-    /// Allows the player to attempt to play a card.
-    /// If the player has the required amount of mana, the card will be played and the mana will be drained.
-    /// If the player does not have the required amount of mana, nothing happens.
+    /// Called whenever a player drags a card onto a BattleField or off of a BattleField.
+    /// Allows for players to "spend" mana without actually playing cards.
     /// </summary>
     /// <param name="field">BattleField in which the card was played</param>
     /// <param name="card">card which the player is trying to play</param>
     public void AttemptPlayCard(BattleField field, CardData card) {
-        if (hasMana(card.getManaCost())) {
+        // if card is being moved onto nothing...
+        if (field == null) {
+            // if card was moved off of a battlefield, return the mana spent to the player & set it to off the fields
+            if (card.getPlayLocation() != null) {
+                changeMana(-1 * card.getManaCost());
+                card.setPlayLoation(null);
+            }
 
-            card.PlayCard(getID(),field);
-
-            changeMana(card.getManaCost());
-
-            DiscardCard(card);
-
+        // if the card was moved onto a field...
+        } else {
+            // if the card was previously not on a field, attempt to spend mana
+            if (card.getPlayLocation() == null) {
+                // if player has enough mana, spend it and put the card on the field
+                if (hasMana(card.getManaCost())) {
+                    card.setPlayLoation(field);
+                    changeMana(card.getManaCost());
+                }
+            // if the card came from a different field, simply transfer it to the new one
+            } else {
+                card.setPlayLoation(field);
+            }
         }
     }
     /// <summary>
@@ -244,6 +274,7 @@ public class PlayerData
     /// </summary>
     /// <param name="card"></param>
     public void DiscardCard(CardData card) {
+        card.setPlayLoation(null);
         hand.Remove(card);
         discard.Add(card);
         card.DestroyPhysicalCard();
@@ -273,20 +304,23 @@ public class PlayerData
     /// </summary>
     /// <param name="card">card to add to deck</param>
     public void AddToDeck(CardData card) {
-        deck.Add(card.clone());
+        CardData newCard = card.clone();
+        newCard.setOwner(this);
+        deck.Add(newCard);
     }
     #endregion
 
-    /// <summary>
-    /// Physically arranges all cards in hand to make them visually appealing.
-    /// </summary>
-    public void ArrangeCardsInHand() {
-        for (int i = 0; i < hand.Count; i++)
-        {
-            MathA.Interpolate(
-                hand[i].getPhysicalCard(), 
-                new Vector2(MathA.GetSpread(i, hand.Count, 0, 2.1f), MathA.GetSpread(getID(), 2, 0, 10)), 
-                0.5f);
-        }
-    }
+    // legacy
+    // /// <summary>
+    // /// Physically arranges all cards in hand to make them visually appealing.
+    // /// </summary>
+    // public void ArrangeCardsInHand() {
+    //     for (int i = 0; i < hand.Count; i++)
+    //     {
+    //         MathA.Interpolate(
+    //             hand[i].getPhysicalCard(), 
+    //             new Vector2(MathA.GetSpread(i, hand.Count, 0, 2.1f), MathA.GetSpread(getID(), 2, 0, 10)), 
+    //             0.5f);
+    //     }
+    // }
 }

@@ -49,6 +49,8 @@ public class GameAssets : MonoBehaviour
 
     public GameObject[] abilityRepresentationPrefabs;
 
+    public GameObject cardBackPrefab;
+
     /// <summary>
     /// Called by Unity prior to the first frame.
     /// Sets up "instance" strategy.

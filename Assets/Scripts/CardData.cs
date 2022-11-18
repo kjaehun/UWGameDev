@@ -75,6 +75,12 @@ public class CardData
     /// </summary>
     private PlayerData owner;
 
+    /// <summary>
+    /// Stores where the card will be played following the ending of a turn.
+    /// If null, will not be played anywhere.
+    /// </summary>
+    private BattleField playLocation;
+
     #endregion
 
     #region getters and setters
@@ -89,7 +95,7 @@ public class CardData
     /// <returns>card description</returns>
     public string getDescription() {return description;}
     /// <summary>
-    /// Getter for the type.
+    /// Getter for the type (attack, defend, skill)
     /// </summary>
     /// <returns>card type</returns>
     public Type getCardType() {return type;}
@@ -127,6 +133,25 @@ public class CardData
         return "Card: " + cardName;
     }
 
+    /// <summary>
+    /// Setter for playLocation.
+    /// The playLocation is where the card will be played once the turns are ended.
+    /// If null, then the card will not be played.
+    /// </summary>
+    /// <param name="field">new playLocation of card</param>
+    public void setPlayLoation(BattleField field) {
+        playLocation = field;
+    }
+    /// <summary>
+    /// Getter for playLocation.
+    /// The playLocation is where the card will be played once the turns are ended.
+    /// If null, then the card will not be played.
+    /// </summary>
+    /// <returns>playLocation of card</returns>
+    public BattleField getPlayLocation() {
+        return playLocation;
+    }
+
     #endregion
 
     #region constructors
@@ -162,6 +187,11 @@ public class CardData
     public CardData clone() {
         return new CardData(this.cardName, this.description, this.type, this.element, this.manaCost, this.dmg, this.def, this.duration, this.skill);
     }
+    /// <summary>
+    /// Deconstructor.
+    /// </summary>
+    ~CardData() {
+    }
     #endregion
 
     #region physical card methods
@@ -169,17 +199,21 @@ public class CardData
     /// Constructs a physical manifestation of this card at a location in the world.
     /// </summary>
     /// <param name="pos">location to place card</param>
-    public void MakePhysicalCard(Vector2 pos) {
+    /// <returns>the newly created physical card as a GameObject</returns>
+    public GameObject MakePhysicalCard(Vector2 pos) {
         if (physicalCard != null) GameObject.Destroy(physicalCard);
         
         physicalCard = GameObject.Instantiate(GameAssets.inst.cardPrefab, pos, Quaternion.identity);
         physicalCard.GetComponent<CardController>().Setup(this);
+
+        return physicalCard;
     }
     /// <summary>
     /// Constructs a physical manifestation of this card at an arbitrary locataion in the world.
     /// </summary>
-    public void MakePhysicalCard() {
-        MakePhysicalCard(Vector2.zero);
+    /// <returns>the newly created physical card as a GameObject</returns>
+    public GameObject MakePhysicalCard() {
+        return MakePhysicalCard(Vector2.zero);
     }
     /// <summary>
     /// Destroys the physical card associated with this card.
@@ -191,19 +225,35 @@ public class CardData
     #endregion
 
     #region methods for playing cards
+    // legacy
+    // /// <summary>
+    // /// Plays a card from a certain player onto the battle field.
+    // /// </summary>
+    // /// <param name="player">player which plays the card</param>
+    // /// <param name="field">BattleField onto which the card is played</param>
+    // public void PlayCard(int player, BattleField field) {
+    //     List<Ability> abilities = FormatAbilities();
+
+    //     foreach (Ability ability in abilities) {
+    //         field.AddAbility(player,ability);
+    //     }
+
+    //     DestroyPhysicalCard();
+    // }
+
     /// <summary>
-    /// Plays a card from a certain player onto the battle field.
+    /// Plays a card according to its "playLocation" and "owner" fields.
     /// </summary>
-    /// <param name="player">player which plays the card</param>
-    /// <param name="field">BattleField onto which the card is played</param>
-    public void PlayCard(int player, BattleField field) {
+    public void PlayCard() {
+        if (playLocation == null) return;
+        if (owner == null) return;
         List<Ability> abilities = FormatAbilities();
 
-        foreach (Ability ability in abilities) {
-            field.AddAbility(player,ability);
-        }
+        int playerIndex = owner.getID();
 
-        DestroyPhysicalCard();
+        foreach (Ability ability in abilities) {
+            playLocation.AddAbility(playerIndex, ability);
+        }
     }
 
     /// <summary>

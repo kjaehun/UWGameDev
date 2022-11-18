@@ -39,7 +39,18 @@ public class GameLogic : MonoBehaviour
     /// Array of all three battle fields present in the game.
     /// Begins empty, but populated when a match begins.
     /// </summary>
-    BattleField[] battleFields = new BattleField[3];
+    private BattleField[] battleFields = new BattleField[3];
+
+    /// <summary>
+    /// This is a little complicated but here is the idea:
+    /// When a turn begins, immediately after the cards are drawn, this array takes a "snapshot" of the cards.
+    /// Think of this "snapshot" as a picture, which is used to show the opponent the proper things.
+    /// The snapshot only records the types of each card (ATTACK, DEFEND, SKILL).
+    /// Thus, the first list maps cards of the first player, and the second list maps cards of the second player.
+    /// Depending on which player is active, the opposite player's card backs are drawn onto the screen using the card backs.
+    /// </summary>
+    private List<CardData.Type>[] cardBacksSnapshot = new List<CardData.Type>[2];
+
 
     void Awake() {
         instance = this;
@@ -109,23 +120,61 @@ public class GameLogic : MonoBehaviour
     /// Resets the mana of both players.
     /// </summary>
     public void StartTurn() {
-        for (int i = 0; i < 5;i++){
-            PlayerData.GetPlayer(0).DrawCard();
-            PlayerData.GetPlayer(1).DrawCard();
+        PlayerData[] players = new PlayerData[] { PlayerData.GetPlayer(0),PlayerData.GetPlayer(1)};
+
+        for (int pl = 0; pl < 2;pl++) {
+            // TODO change from literal '5' to allow players to draw a varied amount of cards
+            // depending on circumstance
+            for (int i = 0; i < 5; i++)
+            {
+                players[pl].DrawCard();
+            }
+            // TODO change from literal '3' to something else to make alterable
+            players[pl].setMana(3);
         }
 
-        PlayerData.GetPlayer(0).ArrangeCardsInHand();
-        PlayerData.GetPlayer(1).ArrangeCardsInHand();
+        TakeSnapshot();
 
-        // TODO change from literal '3' to something else to make alterable
-        PlayerData.GetPlayer(0).setMana(3);
-        PlayerData.GetPlayer(1).setMana(3);
+        // build cards depending on active player
+
+        RenderCards();
+    }
+
+    /// <summary>
+    /// Called by GameLogic.StartTurn.
+    /// Takes a "snapshot" of both player's hands.
+    /// See GameLogic.cardBacksSnapshot for more info.
+    /// </summary>
+    public void TakeSnapshot() {
+        for (int pl = 0; pl < 2;pl++) {
+            cardBacksSnapshot[pl] = new List<CardData.Type>();
+
+            List<CardData> hand = PlayerData.GetPlayer(pl).getHand();
+
+            foreach (CardData card in hand) {
+                cardBacksSnapshot[pl].Add(card.getCardType());
+            }
+        }
+
     }
     /// <summary>
     /// Ends both players turns.
+    /// Plays all cards from each player.
     /// Enacts each battle field to determine what occurs.
     /// </summary>
     public void EndTurns() {
+
+        // play cards from each player
+        PlayerData[] players = PlayerData.GetPlayers();
+        foreach (PlayerData player in players) {
+            List<CardData> hand = player.getHand();
+            while (hand.Count > 0) {
+                hand[0].PlayCard();
+                player.DiscardCard(hand[0]);
+            }
+        }
+
+
         for (int i = 0; i < 2;i++) {
             PlayerData.GetPlayer(i).DiscardHand();
         }
@@ -173,6 +222,7 @@ public class GameLogic : MonoBehaviour
             Debug.Log("Controlling player: " + controllingPlayerIndex);
 
             PlayerData.SetControllingPlayer(controllingPlayerIndex);
+            RenderCards();
         }
 
         if (Input.GetKeyDown(KeyCode.E)) {
@@ -181,11 +231,15 @@ public class GameLogic : MonoBehaviour
         }
 
         if (Input.GetMouseButtonUp(0)  && controlledCard != null) {
+            bool cardDesignated = false;
             foreach (BattleField battleField in battleFields) {
                 if (battleField.getMouseIn(Camera.main.ScreenToWorldPoint(Input.mousePosition))) {
                     PlayerData.GetPlayer(controllingPlayerIndex).AttemptPlayCard(battleField, controlledCard);
+                    cardDesignated = true;
+                    break;
                 }
             }
+            if (!cardDesignated) PlayerData.GetPlayer(controllingPlayerIndex).AttemptPlayCard(null, controlledCard);
         }
 
         if (!controlledCardChanged) controlledCard = null;
@@ -207,5 +261,73 @@ public class GameLogic : MonoBehaviour
     /// <returns>PlayerData of controlling player</returns>
     public PlayerData getCurrentController() {
         return PlayerData.GetPlayer(controllingPlayerIndex);
+    }
+
+    /// <summary>
+    /// Renders cards onto the screen.
+    /// Places opponent card backs onto the top of the screen, along with all player cards in their respective locations.
+    /// TODO optomize
+    /// </summary>
+    public void RenderCards() {
+        // step 0: delete all cards
+        CardBackController.DestroyAllCardBacks();
+        for (int pl = 0; pl < 2;pl++) {
+            foreach (CardData card in PlayerData.GetPlayer(pl).getHand()) {
+                card.DestroyPhysicalCard();
+            }
+        }
+
+        // step 1: make card backs of opponent & put them at their intended positions
+        List<CardData.Type> opponentTypes = cardBacksSnapshot[1 - controllingPlayerIndex];
+
+        for (int i = 0; i < opponentTypes.Count; i++)
+        {
+            // creates new card back
+            GameObject newBack = CardBackController.MakeCardBack(opponentTypes[i]);
+            // moves new card back to its intended location
+            newBack.GetComponent<Transform>().position = new Vector2(MathA.GetSpread(i, opponentTypes.Count, 0, 2.1f), 5f);
+        }
+
+        // step 2: make cards of controlling player & put them at their intended locations
+        {
+            // set up all the lists for where cards could exist
+            // this is necessary because getting their indices will be important later for spreading
+            List<GameObject> heldCards = new List<GameObject>();
+            List<GameObject>[] battleFieldCards = new List<GameObject>[battleFields.Length];
+            for (int i = 0; i < battleFieldCards.Length;i++) {
+                battleFieldCards[i] = new List<GameObject>();
+            }
+
+
+            List<CardData> playerHand = PlayerData.GetPlayer(controllingPlayerIndex).getHand();
+            // goes through each card in the hand and puts it into its proper category
+            foreach (CardData card in playerHand) {
+                GameObject physicalCard = card.MakePhysicalCard();
+
+                BattleField playLocation = card.getPlayLocation();
+                if (playLocation == null) heldCards.Add(physicalCard);
+                else {
+                    for (int i = 0; i < battleFields.Length;i++) {
+                        if (playLocation.Equals(battleFields[i])) battleFieldCards[i].Add(physicalCard);
+                    }
+                }
+            }
+
+            // place all cards at their intended locations
+            for (int i = 0; i < heldCards.Count;i++) {
+                heldCards[i].GetComponent<Transform>().position = new Vector2(MathA.GetSpread(i, heldCards.Count, 0, 2.1f), -5);
+            }
+            for (int field = 0; field < battleFieldCards.Length; field++) {
+                for (int i = 0; i < battleFieldCards[field].Count;i++) {
+                    battleFieldCards[field][i].GetComponent<Transform>().position =
+                    new Vector2(MathA.GetSpread(i, battleFieldCards[field].Count, 0, 2.1f), 0)
+                    + (Vector2)battleFields[field].gameObject.GetComponent<Transform>().position;
+                }
+            }
+        }
+
+
+
+
     }
 }
